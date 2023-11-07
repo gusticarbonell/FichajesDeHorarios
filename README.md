@@ -7,15 +7,17 @@ Este es un sistema de fichaje laboral desarrollado en Python que permite a los u
 
 ## Características
 
-- **Iniciar Jornada**: Los usuarios pueden iniciar una nueva jornada de trabajo con esta opción. Cada jornada se registra con el nombre del usuario y la fecha actual.
+- **Iniciar Jornada**: Los usuarios pueden iniciar una nueva jornada de trabajo con esta opción. Cada jornada se registra con el nombre del usuario y la fecha actual. Se activa tras presionar el número 1.
 
-- **Pausar Jornada**: Si un usuario necesita hacer una pausa durante su jornada de trabajo, puede usar esta opción para pausar el tiempo de trabajo.
+- **Pausar Jornada**: Si un usuario necesita hacer una pausa durante su jornada de trabajo, puede usar esta opción para pausar el tiempo de trabajo. Se activa tras presionar el número 2.
 
-- **Reanudar Jornada**: Cuando un usuario regresa de una pausa, puede reanudar la jornada para continuar el registro del tiempo de trabajo.
+- **Reanudar Jornada**: Cuando un usuario regresa de una pausa, puede reanudar la jornada para continuar el registro del tiempo de trabajo. Se activa tras presionar el número 3.
 
-- **Terminar Jornada**: Al finalizar la jornada laboral, el usuario puede utilizar esta opción para registrar el tiempo total trabajado en horas, minutos y segundos. La información se almacena en un archivo Excel.
+- **Terminar Jornada**: Al finalizar la jornada laboral, el usuario puede utilizar esta opción para registrar el tiempo total trabajado en horas, minutos y segundos. La información se almacena en un archivo Excel. Se activa tras presionar el número 4.
 
-- **Guardar en Excel**: Se proporciona una opción para guardar todos los registros en un archivo Excel para su posterior análisis.
+- **Guardar en Excel**: Se proporciona una opción para guardar todos los registros en un archivo Excel para su posterior análisis. Se activa tras presionar el número 5.
+
+- **Salir**: Cierra la aplicación de forma automatica y ya tienes preparado en tu archivo Excel con tu usuario y el tiempo trabajado con la hoja del mes correspondiente creada de forma automatica para tu control. Se activa esta opción al presionar el número 6
 
 ## Requisitos
 
