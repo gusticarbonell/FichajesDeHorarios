@@ -4,48 +4,61 @@ from openpyxl import Workbook
 
 # Diccionario para almacenar los registros de horario de cada usuario
 registros = {}
+usuario = input("Introduce tu nombre de usuario: ")
 
-def iniciar_jornada(usuario):
-    if usuario not in registros:
-        registros[usuario] = {'horas_trabajadas': datetime.timedelta(), 'fecha': datetime.date.today()}
+def iniciar_jornada():
+    fecha_actual = datetime.date.today()
+    if fecha_actual not in registros:
+        registros[fecha_actual] = {}
+    
+    if usuario not in registros[fecha_actual]:
+        registros[fecha_actual][usuario] = {'hora_inicio': datetime.datetime.now(), 'horas_trabajadas': datetime.timedelta()}
+        print("Jornada iniciada.")
     else:
         print("Ya has iniciado una jornada hoy. Puedes pausar o finalizar la jornada actual.")
 
-def pausar_jornada(usuario):
-    if usuario in registros:
-        if 'pausa' not in registros[usuario]:
-            registros[usuario]['pausa'] = datetime.datetime.now()
-            print("Jornada en pausa.")
+def pausar_jornada():
+    fecha_actual = datetime.date.today()
+    if fecha_actual in registros and usuario in registros[fecha_actual]:
+        if 'pausa' not in registros[fecha_actual][usuario]:
+            registros[fecha_actual][usuario]['pausa'] = datetime.datetime.now()
+            print("Jornada pausada.")
         else:
             print("Ya has pausado la jornada. Puedes reanudarla.")
 
-def reanudar_jornada(usuario):
-    if usuario in registros and 'pausa' in registros[usuario]:
-        pausa = registros[usuario]['pausa']
-        registros[usuario]['horas_trabajadas'] += datetime.datetime.now() - pausa
-        del registros[usuario]['pausa']
+def reanudar_jornada():
+    fecha_actual = datetime.date.today()
+    if fecha_actual in registros and usuario in registros[fecha_actual] and 'pausa' in registros[fecha_actual][usuario]:
+        pausa = registros[fecha_actual][usuario]['pausa']
+        tiempo_pausado = datetime.datetime.now() - pausa
+        # Restaurar la hora de inicio para que el tiempo no avance durante la pausa
+        registros[fecha_actual][usuario]['hora_inicio'] = registros[fecha_actual][usuario]['hora_inicio'] + tiempo_pausado
+        del registros[fecha_actual][usuario]['pausa']
         print("Jornada reanudada.")
+    else:
+        print("No hay una pausa registrada para reanudar.")
 
-def terminar_jornada(usuario, workbook):
-    if usuario in registros:
-        if 'pausa' in registros[usuario]:
-            reanudar_jornada(usuario)
-        horas_trabajadas = registros[usuario]['horas_trabajadas']
-        fecha = registros[usuario]['fecha']
-        horas = int(horas_trabajadas.total_seconds() // 3600)
-        minutos = int((horas_trabajadas.total_seconds() % 3600) // 60)
-        segundos = int(horas_trabajadas.total_seconds() % 60)
-        print(f"Terminaste la jornada con {horas} horas, {minutos} minutos y {segundos} segundos trabajados el {fecha}.")
-        if fecha.month not in registros:
-            registros[fecha.month] = datetime.timedelta()
-        registros[fecha.month] += horas_trabajadas
-        del registros[usuario]
+
+def terminar_jornada(workbook):
+    fecha_actual = datetime.date.today()
+    if fecha_actual in registros and usuario in registros[fecha_actual]:
+        hora_inicio = registros[fecha_actual][usuario]['hora_inicio']
+        horas_trabajadas = datetime.datetime.now() - hora_inicio
+        registros[fecha_actual][usuario]['horas_trabajadas'] += horas_trabajadas
+
+        horas = int(registros[fecha_actual][usuario]['horas_trabajadas'].total_seconds() // 3600)
+        minutos = int((registros[fecha_actual][usuario]['horas_trabajadas'].total_seconds() % 3600) // 60)
+        segundos = int(registros[fecha_actual][usuario]['horas_trabajadas'].total_seconds() % 60)
+        print(f"Terminaste la jornada con {horas} horas, {minutos} minutos y {segundos} segundos trabajados el {fecha_actual}.")
+
+        del registros[fecha_actual][usuario]
 
         # Guardar el registro en el archivo Excel
-        guardar_registro_en_excel(usuario, fecha, horas, minutos, segundos, workbook)
+        guardar_registro_en_excel(fecha_actual, horas, minutos, segundos, workbook)
 
-def guardar_registro_en_excel(usuario, fecha, horas, minutos, segundos, workbook):
-    sheet_name = "Registros"
+def guardar_registro_en_excel(fecha, horas, minutos, segundos, workbook):
+    mes = fecha.strftime("%B")
+    sheet_name = mes
     if sheet_name not in workbook.sheetnames:
         workbook.create_sheet(sheet_name)
         worksheet = workbook[sheet_name]
@@ -57,10 +70,6 @@ def guardar_registro_en_excel(usuario, fecha, horas, minutos, segundos, workbook
 # Crear un archivo Excel
 workbook = Workbook()
 
-# Ruta completa donde deseas guardar el archivo Excel
-excel_ruta = r"E:\HorasTrabajadas\registros_horario.xlsx"
-
-# Ejemplo de uso
 while True:
     print("Opciones:")
     print("1. Iniciar jornada")
@@ -73,22 +82,30 @@ while True:
     opcion = input("Elige una opción: ")
     
     if opcion == '1':
-        usuario = input("Introduce tu nombre: ")
-        iniciar_jornada(usuario)
+        iniciar_jornada()
+        print()
     elif opcion == '2':
-        usuario = input("Introduce tu nombre: ")
-        pausar_jornada(usuario)
+        pausar_jornada()
+        print()
     elif opcion == '3':
-        usuario = input("Introduce tu nombre: ")
-        reanudar_jornada(usuario)
+        reanudar_jornada()
+        print()
     elif opcion == '4':
-        usuario = input("Introduce tu nombre: ")
-        terminar_jornada(usuario, workbook)
+        terminar_jornada(workbook)
+        print()
     elif opcion == '5':
         excel_filename = "registros_horario.xlsx"
         workbook.save(excel_filename)
         print(f"Registros guardados en el archivo '{excel_filename}'.")
+        if 'horas_trabajadas' in registros.get(datetime.date.today(), {}).get(usuario, {}):
+            tiempo_trabajado = registros[datetime.date.today()][usuario]['horas_trabajadas']
+            horas = int(tiempo_trabajado.total_seconds() // 3600)
+            minutos = int((tiempo_trabajado.total_seconds() % 3600) // 60)
+            segundos = int(tiempo_trabajado.total_seconds() % 60)
+            print(f"Horas Trabajadas: {horas} horas, {minutos} minutos y {segundos} segundos.")
+        print()
     elif opcion == '6':
         break
     else:
         print("Opción no válida. Inténtalo de nuevo.")
+        print()
